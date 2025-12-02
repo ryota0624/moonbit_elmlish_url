@@ -1,31 +1,5 @@
 ///|
-pub fn fib(n : Int) -> Int64 {
-  loop (n, 0L, 1L) {
-    (0, _, b) => b
-    (i, a, b) => continue (i - 1, b, a + b)
-  }
-}
-
-///|
-/// data is a labelled argument without default value having type Array[Int]
-/// start is an optional labelled argument with default value 0 having type Int
-/// length is an optional labelled argument without default value having type Option[Int]
-pub fn sum(data~ : Array[Int], start? : Int = 0, length? : Int) -> Int {
-  let end = if length is Some(length) { start + length } else { data.length() }
-  for i = start, sum = 0; i < end; i = i + 1, sum = sum + data[i] {
-
-  } else {
-    sum
-  }
-}
-
-// type Parser a b =
-//   Parser (State a -> List (State b))
-
-// type Parser[A, B] = (State[A]) -> Array[State[B]]
-
-///|
-struct Parser[In, Out]((State[In]) -> Array[State[Out]])
+pub struct Parser[In, Out]((State[In]) -> Array[State[Out]])
 
 ///|
 fn[A, B] Parser::parse(
@@ -37,32 +11,13 @@ fn[A, B] Parser::parse(
 }
 
 ///|
-priv struct State[Value] {
+pub struct State[Value] {
   visited : Array[String]
   unvisited : Array[String]
   params : Map[String, Array[String]]
   frag : String?
   value : Value
 }
-
-// string : Parser (String -> a) a
-// string =
-//   custom "STRING" Just
-
-// custom : String -> (String -> Maybe a) -> Parser (a -> b) b
-// custom tipe stringToSomething =
-//   Parser <| \{ visited, unvisited, params, frag, value } ->
-//     case unvisited of
-//       [] ->
-//         []
-
-//       next :: rest ->
-//         case stringToSomething next of
-//           Just nextValue ->
-//             [ State (next :: visited) rest params frag (value nextValue) ]
-
-//           Nothing ->
-//             []
 
 ///|
 fn[A, B] custom(_ : String, f : (String) -> A?) -> Parser[(A) -> B, B] {
@@ -136,13 +91,15 @@ fn[A, B, C] slash(
   parser1 : Parser[A, B],
   parser2 : Parser[B, C],
 ) -> Parser[A, C] {
-  Parser(fn(state) {
-    parser1.parse(state) |> Array::map(_, parser2.parse(_)) |> Array::flatten
-  })
+  Parser(state => parser1.parse(state)
+    |> Array::map(_, parser2.parse(_))
+    |> Array::flatten)
 }
 
 ///|
 pub fn p2() -> Unit {
+  // let a = (top() / s("users") / string())
+  //   |> map(userId => postId => (userId, postId), _)
   let u = top()
     |> slash(s("users"))
     |> slash(string())
@@ -175,10 +132,6 @@ fn[A, B, C] map(subValue : A, parser : Parser[A, B]) -> Parser[(B) -> C, C] {
   })
 }
 
-// mapState : (a -> b) -> State a -> State b
-// mapState func { visited, unvisited, params, frag, value } =
-//   State visited unvisited params frag (func value)
-
 ///|
 fn[A, B] mapState(func : (A) -> B, state : State[A]) -> State[B] {
   State::{
@@ -189,17 +142,6 @@ fn[A, B] mapState(func : (A) -> B, state : State[A]) -> State[B] {
     value: func(state.value),
   }
 }
-
-// map : a -> Parser a b -> Parser (b -> c) c
-// map subValue (Parser parseArg) =
-//   Parser <| \{ visited, unvisited, params, frag, value } ->
-//     List.map (mapState value) <| parseArg <|
-//       State visited unvisited params frag subValue
-
-// parse : Parser (a -> a) a -> Url -> Maybe a
-// parse (Parser parser) url =
-//   getFirstMatch <| parser <|
-//     State [] (preparePath url.path) (prepareQuery url.query) url.fragment identity
 
 ///|
 fn[A] parse(parser : Parser[(A) -> A, A], url : String) -> A? {
@@ -212,9 +154,6 @@ fn[A] parse(parser : Parser[(A) -> A, A], url : String) -> A? {
   }
   get_first_match(parser.parse(state))
 }
-
-// get_first_match <| parser <|
-//   State [] (prepare_path url.path) (prepare_query url.query) url.fragment identity
 
 ///|
 fn prepare_path(path : String) -> Array[StringView] {
