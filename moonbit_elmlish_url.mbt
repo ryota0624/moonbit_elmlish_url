@@ -20,7 +20,7 @@ pub struct State[Value] {
 }
 
 ///|
-fn[A, B] custom(_ : String, f : (String) -> A?) -> Parser[(A) -> B, B] {
+pub fn[A, B] custom(_ : String, f : (String) -> A?) -> Parser[(A) -> B, B] {
   Parser(fn(state) {
     match state.unvisited {
       [] => []
@@ -43,12 +43,12 @@ fn[A, B] custom(_ : String, f : (String) -> A?) -> Parser[(A) -> B, B] {
 }
 
 ///|
-fn[A] string() -> Parser[(String) -> A, A] {
+pub fn[A] string() -> Parser[(String) -> A, A] {
   custom("STRING", Some(_))
 }
 
 ///|
-fn[A] int() -> Parser[(Int) -> A, A] {
+pub fn[A] int() -> Parser[(Int) -> A, A] {
   custom("INT", (str : String) => {
     let st = try? @strconv.from_str(str)
     match st {
@@ -59,7 +59,7 @@ fn[A] int() -> Parser[(Int) -> A, A] {
 }
 
 ///|
-fn[A] s(str : String) -> Parser[A, A] {
+pub fn[A] s(str : String) -> Parser[A, A] {
   Parser(fn(state) {
     match state.unvisited {
       [] => []
@@ -82,12 +82,12 @@ fn[A] s(str : String) -> Parser[A, A] {
 }
 
 ///|
-fn[A] top() -> Parser[A, A] {
+pub fn[A] top() -> Parser[A, A] {
   Parser(fn(state) { [state] })
 }
 
 ///|
-fn[A, B, C] slash(
+pub fn[A, B, C] slash(
   parser1 : Parser[A, B],
   parser2 : Parser[B, C],
 ) -> Parser[A, C] {
@@ -97,26 +97,9 @@ fn[A, B, C] slash(
 }
 
 ///|
-pub fn p2() -> Unit {
-  // let a = (top() / s("users") / string())
-  //   |> map(userId => postId => (userId, postId), _)
-  let u = top()
-    |> slash(s("users"))
-    |> slash(string())
-    |> slash(s("posts"))
-    |> slash(int())
-    |> map(userId => postId => (userId, postId), _)
-  let st = parse(u, "users/alice/posts/123")
-  println(st)
-  let u2 = s("users") |> slash(_, string()) |> map(userId => userId, _)
-  let st2 = parse(u2, "/users/bob")
-  println(st2)
-}
 
 ///|
-
-///|
-fn[A, B, C] map(subValue : A, parser : Parser[A, B]) -> Parser[(B) -> C, C] {
+pub fn[A, B, C] map(subValue : A, parser : Parser[A, B]) -> Parser[(B) -> C, C] {
   Parser(fn(state) {
     mapState(state.value, _)
     |> Array::map(
@@ -144,7 +127,7 @@ fn[A, B] mapState(func : (A) -> B, state : State[A]) -> State[B] {
 }
 
 ///|
-fn[A] parse(parser : Parser[(A) -> A, A], url : String) -> A? {
+pub fn[A] parse(parser : Parser[(A) -> A, A], url : String) -> A? {
   let state = State::{
     visited: [],
     unvisited: prepare_path(url) |> Array::map(_, StringView::to_string(_)),
@@ -185,3 +168,4 @@ fn[A] get_first_match(states : Array[State[A]]) -> A? {
       }
   }
 }
+

@@ -2,7 +2,7 @@
   "is-main": true,
   "import": [
     {
-      "path": "username/moonbit_elmlish_url",
+      "path": "ryota0624/moonbit_elmlish_url",
       "alias": "lib"
     }
   ]
