@@ -1,5 +1,5 @@
 ///|
-/// URLパーサーを表す型。入力型`In`から出力型`Out`への変換を行う
+/// URLパーサーを表す型。入力型`In`から出力型`Out`への変換を行います
 /// 
 /// パーサーは状態遷移関数を内部に持ち、URL文字列を段階的に解析します
 pub struct Parser[In, Out]((State[In]) -> Array[State[Out]])
@@ -30,10 +30,10 @@ pub struct State[Value] {
 }
 
 ///|
-/// カスタムパーサーを作成する関数
+/// カスタムパーサーを作成する関数です
 /// 
 /// 第1引数: パーサーの名前(デバッグ用)
-/// 第2引数: 文字列を受け取り、パース結果を返す関数
+/// 第2引数: 文字列を受け取って、パース結果を返す関数
 /// 
 /// 例: `custom("NUMBER", str => Int::from_string(str))`
 pub fn[A, B] custom(_ : String, f : (String) -> A?) -> Parser[(A) -> B, B] {
@@ -90,7 +90,7 @@ pub fn[A] int() -> Parser[(Int) -> A, A] {
 /// 
 /// 指定された文字列と完全一致する場合のみパースが成功します
 /// 
-/// 例: `s("users")` は `/users` の `users` 部分にマッチ
+/// 例: `s("users")` は `/users` の `users` 部分にマッチします
 pub fn[A] s(str : String) -> Parser[A, A] {
   Parser(fn(state) {
     match state.unvisited {
@@ -125,14 +125,14 @@ pub fn[A] top() -> Parser[A, A] {
 }
 
 ///|
-/// 2つのパーサーをスラッシュ(/)で連結する
+/// 2つのパーサーをスラッシュ(/)で連結します
 /// 
 /// 第1引数: 左側のパーサー
 /// 第2引数: 右側のパーサー
 /// 
 /// パーサーを順番に適用し、URLのパスを段階的に解析します
 /// 
-/// 例: `slash(s("users"), string())` は `/users/alice` にマッチ
+/// 例: `slash(s("users"), string())` は `/users/alice` にマッチします
 pub fn[A, B, C] slash(
   parser1 : Parser[A, B],
   parser2 : Parser[B, C],
@@ -145,14 +145,14 @@ pub fn[A, B, C] slash(
 ///|
 
 ///|
-/// パース結果を変換する関数をパーサーに適用する
+/// パース結果を変換する関数をパーサーに適用します
 /// 
 /// 第1引数: 新しい初期値
 /// 第2引数: 適用するパーサー
 /// 
 /// パースされた値を別の値に変換し、最終的な結果の型を構築します
 /// 
-/// 例: `map(userId => postId => (userId, postId), parser)` でタプルを構築
+/// 例: `map(userId => postId => (userId, postId), parser)` でタプルを構築します
 pub fn[A, B, C] map(subValue : A, parser : Parser[A, B]) -> Parser[(B) -> C, C] {
   Parser(fn(state) {
     mapState(state.value, _)
@@ -181,7 +181,7 @@ fn[A, B] mapState(func : (A) -> B, state : State[A]) -> State[B] {
 }
 
 ///|
-/// パーサーを実行してURL文字列を解析する
+/// パーサーを実行してURL文字列を解析します
 /// 
 /// 第1引数: 使用するパーサー
 /// 第2引数: 解析するURL文字列
